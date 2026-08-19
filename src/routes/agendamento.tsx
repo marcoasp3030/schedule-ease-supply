@@ -54,6 +54,9 @@ function Agendamento() {
 
   const [email, setEmail] = useState("");
   const [supplier, setSupplier] = useState("");
+  const [cnpj, setCnpj] = useState("");
+  const [cnpjStatus, setCnpjStatus] = useState<string | null>(null);
+  const [cnpjLoading, setCnpjLoading] = useState(false);
   const [other, setOther] = useState("");
   const [orders, setOrders] = useState(1);
   const [purchaseOrder, setPurchaseOrder] = useState("");
@@ -108,6 +111,56 @@ function Agendamento() {
     const dow = day.getDay();
     if (!settings.allow_weekend && (dow === 0 || dow === 6)) return true;
     return (dayTotals.get(toISODate(day)) ?? 0) >= settings.max_per_day;
+  }
+
+  function onlyDigits(v: string) {
+    return v.replace(/\D/g, "");
+  }
+
+  function formatCnpj(v: string) {
+    const d = onlyDigits(v).slice(0, 14);
+    return d
+      .replace(/^(\d{2})(\d)/, "$1.$2")
+      .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/\.(\d{3})(\d)/, ".$1/$2")
+      .replace(/(\d{4})(\d)/, "$1-$2");
+  }
+
+  async function handleCnpjChange(value: string) {
+    const masked = formatCnpj(value);
+    setCnpj(masked);
+    const digits = onlyDigits(masked);
+    if (digits.length < 14) {
+      setCnpjStatus(null);
+      return;
+    }
+    setCnpjLoading(true);
+    setCnpjStatus(null);
+    try {
+      const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${digits}`);
+      if (!res.ok) throw new Error("not found");
+      const data = (await res.json()) as {
+        razao_social?: string;
+        nome_fantasia?: string;
+      };
+      const name = (data.razao_social || data.nome_fantasia || "").trim();
+      if (!name) throw new Error("empty");
+      const match = (suppliersQuery.data ?? []).find(
+        (s) => s.name.trim().toLowerCase() === name.toLowerCase(),
+      );
+      if (match) {
+        setSupplier(match.name);
+        setOther("");
+      } else {
+        setSupplier("OUTROS");
+        setOther(name.slice(0, 200));
+      }
+      setCnpjStatus(`Razão social: ${name}`);
+    } catch {
+      setCnpjStatus("CNPJ não encontrado. Selecione a empresa manualmente.");
+    } finally {
+      setCnpjLoading(false);
+    }
   }
 
   async function submit() {
@@ -324,6 +377,25 @@ function Agendamento() {
               </div>
 
               <div>
+                <Label htmlFor="cnpj" className="font-bold">
+                  CNPJ do fornecedor
+                </Label>
+                <Input
+                  id="cnpj"
+                  inputMode="numeric"
+                  placeholder="00.000.000/0000-00"
+                  className="mt-2 max-w-[260px]"
+                  value={cnpj}
+                  onChange={(e) => handleCnpjChange(e.target.value)}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {cnpjLoading
+                    ? "Buscando razão social..."
+                    : (cnpjStatus ?? "Informe o CNPJ para preencher a razão social automaticamente.")}
+                </p>
+              </div>
+
+              <div>
                 <Label className="font-bold">
                   Fornecedores - Escolha abaixo a empresa a qual representa{" "}
                   <span className="italic font-normal text-destructive">(obrigatório)</span>
@@ -389,9 +461,10 @@ function Agendamento() {
                 <Input
                   id="po"
                   className="mt-2 max-w-[200px]"
+                  inputMode="numeric"
                   value={purchaseOrder}
-                  maxLength={100}
-                  onChange={(e) => setPurchaseOrder(e.target.value)}
+                  maxLength={20}
+                  onChange={(e) => setPurchaseOrder(onlyDigits(e.target.value))}
                 />
               </div>
 
@@ -403,11 +476,11 @@ function Agendamento() {
                   </Label>
                   <Input
                     id="items"
-                    type="number"
-                    min={1}
+                    inputMode="numeric"
                     className="mt-2"
                     value={items}
-                    onChange={(e) => setItems(e.target.value)}
+                    maxLength={6}
+                    onChange={(e) => setItems(onlyDigits(e.target.value))}
                   />
                 </div>
                 <div>
@@ -417,11 +490,11 @@ function Agendamento() {
                   </Label>
                   <Input
                     id="boxes"
-                    type="number"
-                    min={1}
+                    inputMode="numeric"
                     className="mt-2"
                     value={boxes}
-                    onChange={(e) => setBoxes(e.target.value)}
+                    maxLength={6}
+                    onChange={(e) => setBoxes(onlyDigits(e.target.value))}
                   />
                 </div>
               </div>
