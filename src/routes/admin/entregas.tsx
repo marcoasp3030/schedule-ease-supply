@@ -77,12 +77,31 @@ const STATUS_META: Record<StatusKey, { label: string; className: string }> = {
   },
 };
 
+function toISO(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate(),
+  ).padStart(2, "0")}`;
+}
+
+function shiftDays(days: number) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return toISO(d);
+}
+
+const PAGE_SIZE = 15;
+
 function EntregasPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [ready, setReady] = useState(false);
   const [filter, setFilter] = useState<"todas" | StatusKey>("todas");
   const [search, setSearch] = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [vehicle, setVehicle] = useState("todos");
+  const [sortDir, setSortDir] = useState<"desc" | "asc">("desc");
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -122,23 +141,120 @@ function EntregasPage() {
 
   const rows = appointmentsQuery.data ?? [];
 
-  const counts = useMemo(() => {
-    const base = { pendente: 0, concluida: 0, cancelada: 0 } as Record<StatusKey, number>;
-    for (const r of rows) base[statusOf(r.status)] += 1;
-    return base;
-  }, [rows]);
-
-  const visible = useMemo(() => {
+  // linhas dentro do período (base dos contadores)
+  const inPeriod = useMemo(() => {
     const term = search.trim().toLowerCase();
     return rows.filter((r) => {
-      if (filter !== "todas" && statusOf(r.status) !== filter) return false;
+      if (from && r.scheduled_date < from) return false;
+      if (to && r.scheduled_date > to) return false;
+      if (vehicle !== "todos" && r.vehicle_type !== vehicle) return false;
       if (!term) return true;
       return [r.other_supplier_name || r.supplier_name, r.email, r.purchase_order]
         .join(" ")
         .toLowerCase()
         .includes(term);
     });
-  }, [rows, filter, search]);
+  }, [rows, search, from, to, vehicle]);
+
+  const counts = useMemo(() => {
+    const base = { pendente: 0, concluida: 0, cancelada: 0 } as Record<StatusKey, number>;
+    for (const r of inPeriod) base[statusOf(r.status)] += 1;
+    return base;
+  }, [inPeriod]);
+
+  const vehicles = useMemo(
+    () => Array.from(new Set(rows.map((r) => r.vehicle_type).filter(Boolean))).sort(),
+    [rows],
+  );
+
+  const visible = useMemo(() => {
+    const list = inPeriod.filter(
+      (r) => filter === "todas" || statusOf(r.status) === filter,
+    );
+    return [...list].sort((a, b) => {
+      const ka = `${a.scheduled_date}T${a.scheduled_time}`;
+      const kb = `${b.scheduled_date}T${b.scheduled_time}`;
+      return sortDir === "desc" ? kb.localeCompare(ka) : ka.localeCompare(kb);
+    });
+  }, [inPeriod, filter, sortDir]);
+
+  const totals = useMemo(
+    () =>
+      visible.reduce(
+        (acc, r) => ({
+          items: acc.items + (r.total_items || 0),
+          boxes: acc.boxes + (r.box_volume || 0),
+        }),
+        { items: 0, boxes: 0 },
+      ),
+    [visible],
+  );
+
+  const totalPages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageRows = visible.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filter, search, from, to, vehicle, sortDir]);
+
+  function applyPreset(days: number | "mes") {
+    if (days === "mes") {
+      const d = new Date();
+      setFrom(toISO(new Date(d.getFullYear(), d.getMonth(), 1)));
+      setTo(toISO(new Date(d.getFullYear(), d.getMonth() + 1, 0)));
+      return;
+    }
+    if (days === 0) {
+      setFrom(toISO(new Date()));
+      setTo(toISO(new Date()));
+      return;
+    }
+    if (days > 0) {
+      setFrom(toISO(new Date()));
+      setTo(shiftDays(days));
+    } else {
+      setFrom(shiftDays(days));
+      setTo(toISO(new Date()));
+    }
+  }
+
+  function clearFilters() {
+    setFilter("todas");
+    setSearch("");
+    setFrom("");
+    setTo("");
+    setVehicle("todos");
+  }
+
+  function exportExcel() {
+    const data = visible.map((a) => ({
+      Data: new Date(`${a.scheduled_date}T00:00:00`).toLocaleDateString("pt-BR"),
+      Hora: a.scheduled_time.slice(0, 5),
+      Empresa: a.other_supplier_name || a.supplier_name,
+      "E-mail": a.email,
+      Pedido: a.purchase_order,
+      Itens: a.total_items,
+      Caixas: a.box_volume,
+      Veículo: a.vehicle_type,
+      Status: STATUS_META[statusOf(a.status)].label,
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    ws["!cols"] = [
+      { wch: 12 },
+      { wch: 8 },
+      { wch: 30 },
+      { wch: 28 },
+      { wch: 16 },
+      { wch: 8 },
+      { wch: 8 },
+      { wch: 16 },
+      { wch: 12 },
+    ];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Entregas");
+    XLSX.writeFile(wb, `entregas-${toISO(new Date())}.xlsx`);
+  }
 
   async function setStatus(id: string, status: string) {
     await supabase.from("appointments").update({ status }).eq("id", id);
