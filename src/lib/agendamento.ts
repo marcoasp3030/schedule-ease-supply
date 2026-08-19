@@ -15,15 +15,14 @@ export type Availability = {
   total: number;
 };
 
-export const VEHICLES = [
-  "Utilitário",
-  "VUC",
-  "Toco",
-  "Truck",
-  "Carreta",
-  "Van",
-  "Moto",
-];
+export async function fetchVehicleTypes() {
+  const { data, error } = await supabase
+    .from("vehicle_types")
+    .select("id, name, active")
+    .order("name");
+  if (error) throw error;
+  return data ?? [];
+}
 
 export const SERVICES = ["Entrega de Mercadoria", "Coleta / Devolução"];
 
