@@ -1,0 +1,288 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { CalendarDays, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { NutricarShell } from "@/components/nutricar-shell";
+import { supabase } from "@/integrations/supabase/client";
+
+export const Route = createFileRoute("/admin/entregas")({
+  ssr: false,
+  head: () => ({
+    meta: [
+      { title: "Entregas agendadas | NUTRICAR" },
+      {
+        name: "description",
+        content:
+          "Acompanhe as entregas agendadas dos fornecedores NUTRICAR, com status pendente, concluída ou cancelada.",
+      },
+      { property: "og:title", content: "Entregas agendadas | NUTRICAR" },
+      {
+        property: "og:description",
+        content: "Lista de entregas de fornecedores com status e cancelamento.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
+  component: EntregasPage,
+});
+
+type Appointment = {
+  id: string;
+  scheduled_date: string;
+  scheduled_time: string;
+  email: string;
+  supplier_name: string;
+  other_supplier_name: string | null;
+  purchase_order: string;
+  total_items: number;
+  box_volume: number;
+  vehicle_type: string;
+  status: string;
+};
+
+type StatusKey = "pendente" | "concluida" | "cancelada";
+
+function statusOf(raw: string): StatusKey {
+  const s = raw.toLowerCase();
+  if (s.startsWith("cancel")) return "cancelada";
+  if (s.startsWith("conclu")) return "concluida";
+  return "pendente";
+}
+
+const STATUS_META: Record<StatusKey, { label: string; className: string }> = {
+  pendente: {
+    label: "Pendente",
+    className: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30",
+  },
+  concluida: {
+    label: "Concluída",
+    className: "bg-primary/15 text-primary border-primary/30",
+  },
+  cancelada: {
+    label: "Cancelada",
+    className: "bg-destructive/15 text-destructive border-destructive/30",
+  },
+};
+
+function EntregasPage() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [ready, setReady] = useState(false);
+  const [filter, setFilter] = useState<"todas" | StatusKey>("todas");
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) navigate({ to: "/auth" });
+      else setReady(true);
+    });
+  }, [navigate]);
+
+  const roleQuery = useQuery({
+    queryKey: ["is-admin"],
+    enabled: ready,
+    queryFn: async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return false;
+      const { data, error } = await supabase.rpc("has_role", {
+        _user_id: userData.user.id,
+        _role: "admin",
+      });
+      if (error) throw error;
+      return Boolean(data);
+    },
+  });
+
+  const appointmentsQuery = useQuery({
+    queryKey: ["appointments"],
+    enabled: ready,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("appointments")
+        .select("*")
+        .order("scheduled_date", { ascending: false })
+        .order("scheduled_time");
+      if (error) throw error;
+      return (data ?? []) as Appointment[];
+    },
+  });
+
+  const rows = appointmentsQuery.data ?? [];
+
+  const counts = useMemo(() => {
+    const base = { pendente: 0, concluida: 0, cancelada: 0 } as Record<StatusKey, number>;
+    for (const r of rows) base[statusOf(r.status)] += 1;
+    return base;
+  }, [rows]);
+
+  const visible = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return rows.filter((r) => {
+      if (filter !== "todas" && statusOf(r.status) !== filter) return false;
+      if (!term) return true;
+      return [r.other_supplier_name || r.supplier_name, r.email, r.purchase_order]
+        .join(" ")
+        .toLowerCase()
+        .includes(term);
+    });
+  }, [rows, filter, search]);
+
+  async function setStatus(id: string, status: string) {
+    await supabase.from("appointments").update({ status }).eq("id", id);
+    queryClient.invalidateQueries({ queryKey: ["appointments"] });
+  }
+
+  if (!ready) return null;
+
+  if (!roleQuery.isLoading && roleQuery.data !== true) {
+    return (
+      <NutricarShell>
+        <div className="surface-card p-6 text-sm text-destructive">
+          Sua conta não tem permissão de administrador.
+        </div>
+      </NutricarShell>
+    );
+  }
+
+  return (
+    <NutricarShell>
+      <div className="space-y-6">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 surface-card p-5">
+          <div className="min-w-0">
+            <h1 className="truncate text-xl font-bold tracking-tight">Entregas agendadas</h1>
+            <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+              Acompanhamento e status
+            </p>
+          </div>
+          <Button asChild variant="outline">
+            <Link to="/admin">Voltar ao painel</Link>
+          </Button>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          {(["pendente", "concluida", "cancelada"] as StatusKey[]).map((key) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setFilter(filter === key ? "todas" : key)}
+              className={`surface-card flex items-center gap-3 p-4 text-left transition-colors ${
+                filter === key ? "ring-2 ring-primary" : "hover:bg-secondary/40"
+              }`}
+            >
+              {key === "pendente" && <Clock className="size-5 text-amber-600" />}
+              {key === "concluida" && <CheckCircle2 className="size-5 text-primary" />}
+              {key === "cancelada" && <XCircle className="size-5 text-destructive" />}
+              <div>
+                <p className="text-2xl font-bold leading-none">{counts[key]}</p>
+                <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                  {STATUS_META[key].label}
+                </p>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        <section className="space-y-4 surface-card p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap gap-2">
+              {(["todas", "pendente", "concluida", "cancelada"] as const).map((key) => (
+                <Button
+                  key={key}
+                  size="sm"
+                  variant={filter === key ? "default" : "outline"}
+                  onClick={() => setFilter(key)}
+                >
+                  {key === "todas" ? "Todas" : STATUS_META[key].label}
+                </Button>
+              ))}
+            </div>
+            <Input
+              className="w-full sm:w-64"
+              placeholder="Buscar empresa, e-mail ou pedido"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[880px] text-left text-sm">
+              <thead className="border-b border-border text-xs uppercase tracking-wider text-muted-foreground">
+                <tr>
+                  <th className="py-2">Data / hora</th>
+                  <th>Empresa</th>
+                  <th>E-mail</th>
+                  <th>Pedido</th>
+                  <th>Itens</th>
+                  <th>Caixas</th>
+                  <th>Veículo</th>
+                  <th>Status</th>
+                  <th className="text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visible.map((a) => {
+                  const st = statusOf(a.status);
+                  return (
+                    <tr
+                      key={a.id}
+                      className="border-b border-border/60 transition-colors hover:bg-secondary/50"
+                    >
+                      <td className="py-3">
+                        <span className="flex items-center gap-2">
+                          <CalendarDays className="size-4 text-muted-foreground" />
+                          {new Date(`${a.scheduled_date}T00:00:00`).toLocaleDateString("pt-BR")}
+                          <span className="text-muted-foreground">{a.scheduled_time.slice(0, 5)}</span>
+                        </span>
+                      </td>
+                      <td>{a.other_supplier_name || a.supplier_name}</td>
+                      <td>{a.email}</td>
+                      <td>{a.purchase_order}</td>
+                      <td>{a.total_items}</td>
+                      <td>{a.box_volume}</td>
+                      <td>{a.vehicle_type}</td>
+                      <td>
+                        <span
+                          className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${STATUS_META[st].className}`}
+                        >
+                          {STATUS_META[st].label}
+                        </span>
+                      </td>
+                      <td className="py-2 text-right">
+                        {st === "pendente" ? (
+                          <span className="flex justify-end gap-2">
+                            <Button size="sm" onClick={() => setStatus(a.id, "concluida")}>
+                              Concluir
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setStatus(a.id, "cancelada")}
+                            >
+                              Cancelar
+                            </Button>
+                          </span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {visible.length === 0 && (
+                  <tr>
+                    <td colSpan={9} className="py-8 text-center text-muted-foreground">
+                      Nenhuma entrega encontrada.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </NutricarShell>
+  );
+}

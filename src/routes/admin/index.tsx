@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { NutricarShell } from "@/components/nutricar-shell";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchSettings, type Settings } from "@/lib/agendamento";
 
-export const Route = createFileRoute("/admin")({
+export const Route = createFileRoute("/admin/")({
   ssr: false,
   head: () => ({
     meta: [
@@ -151,9 +151,14 @@ function AdminPage() {
               Regras e agendamentos
             </p>
           </div>
-          <Button variant="outline" onClick={signOut}>
-            Sair
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="secondary">
+              <Link to="/admin/entregas">Entregas agendadas</Link>
+            </Button>
+            <Button variant="outline" onClick={signOut}>
+              Sair
+            </Button>
+          </div>
         </div>
 
         {!roleQuery.isLoading && !isAdmin && (
