@@ -115,6 +115,7 @@ function Agendamento() {
 
   async function submit() {
     setError(null);
+    setError(null);
     if (!date || !time) return;
     if (!email || !supplier || !purchaseOrder || !items || !boxes || !vehicle) {
       setError("Preencha todos os campos obrigatórios.");
