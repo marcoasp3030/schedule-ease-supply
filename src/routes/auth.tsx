@@ -55,9 +55,12 @@ function AuthPage() {
     <NutricarShell>
       <form
         onSubmit={submit}
-        className="mx-auto w-full max-w-md space-y-4 bg-card/95 p-6 shadow-xl"
+        className="mx-auto w-full max-w-md space-y-4 surface-card p-8"
       >
-        <h1 className="text-xl font-bold">Área restrita</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Área restrita</h1>
+        <p className="text-sm text-muted-foreground">
+          Acesso exclusivo da equipe NUTRICAR.
+        </p>
         <div>
           <Label htmlFor="email">E-mail</Label>
           <Input
