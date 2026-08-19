@@ -54,6 +54,9 @@ function Agendamento() {
 
   const [email, setEmail] = useState("");
   const [supplier, setSupplier] = useState("");
+  const [cnpj, setCnpj] = useState("");
+  const [cnpjStatus, setCnpjStatus] = useState<string | null>(null);
+  const [cnpjLoading, setCnpjLoading] = useState(false);
   const [other, setOther] = useState("");
   const [orders, setOrders] = useState(1);
   const [purchaseOrder, setPurchaseOrder] = useState("");
