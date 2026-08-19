@@ -1,9 +1,19 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, CheckCircle2, Clock, XCircle } from "lucide-react";
+import {
+  ArrowDownUp,
+  CalendarDays,
+  CheckCircle2,
+  Clock,
+  Download,
+  RotateCcw,
+  XCircle,
+} from "lucide-react";
+import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { NutricarShell } from "@/components/nutricar-shell";
 import { supabase } from "@/integrations/supabase/client";
 
