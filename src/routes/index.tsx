@@ -1,24 +1,42 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { NutricarShell } from "@/components/nutricar-shell";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Central de Agendamentos NUTRICAR" },
+      {
+        name: "description",
+        content:
+          "Agende a entrega de mercadorias na NUTRICAR: escolha data, horário e informe os dados do pedido em poucos passos.",
+      },
+      { property: "og:title", content: "Central de Agendamentos NUTRICAR" },
+      {
+        property: "og:description",
+        content: "Agendamento de recebimento para fornecedores NUTRICAR.",
+      },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <NutricarShell>
+      <div className="mx-auto max-w-2xl bg-card/85 p-10 text-center shadow-lg backdrop-blur-sm">
+        <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
+          Bem Vindo a Central de Agendamentos NUTRICAR
+        </h1>
+        <p className="mt-2 text-lg text-foreground">
+          Para seguir com sua solicitação clique no botão abaixo.
+        </p>
+        <Link
+          to="/agendamento"
+          className="mt-8 inline-flex items-center justify-center rounded-md bg-primary px-8 py-4 text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+        >
+          Clique aqui para iniciar o agendamento
+        </Link>
+      </div>
+    </NutricarShell>
   );
 }
