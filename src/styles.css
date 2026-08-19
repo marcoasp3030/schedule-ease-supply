@@ -86,6 +86,11 @@
   --ring: oklch(0.585 0.113 127);
   --nutri-bar: oklch(0.18 0.01 130);
   --nutri-bar-foreground: oklch(0.98 0.005 120);
+  --primary-glow: oklch(0.72 0.13 128);
+  --gradient-primary: linear-gradient(135deg, oklch(0.5 0.1 130), oklch(0.68 0.13 128));
+  --gradient-bar: linear-gradient(90deg, oklch(0.18 0.01 130), oklch(0.28 0.03 132));
+  --shadow-elegant: 0 24px 60px -28px color-mix(in oklab, var(--primary) 55%, transparent);
+  --shadow-card: 0 10px 40px -18px oklch(0.2 0.02 130 / 35%);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -145,4 +150,16 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
+}
+
+@utility surface-card {
+  background-color: color-mix(in oklab, var(--card) 92%, transparent);
+  backdrop-filter: blur(14px);
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-card);
+}
+
+@utility gradient-primary {
+  background-image: var(--gradient-primary);
 }
