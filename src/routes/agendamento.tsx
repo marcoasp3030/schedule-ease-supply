@@ -205,7 +205,7 @@ function Agendamento() {
                   Selecione uma data e horário disponível{" "}
                   <span className="italic font-normal text-destructive">(obrigatório)</span>
                 </Label>
-                <div className="mt-2 rounded-md border border-border bg-background">
+                <div className="mt-2 overflow-hidden rounded-xl border border-border bg-background shadow-sm">
                   <Calendar
                     mode="single"
                     locale={ptBR}
@@ -220,8 +220,8 @@ function Agendamento() {
                     className="pointer-events-auto p-3"
                   />
                   {date && settings && (
-                    <div className="border-t border-border bg-muted/40 p-3">
-                      <p className="text-center text-sm">
+                    <div className="border-t border-border bg-secondary/60 p-4">
+                      <p className="text-center text-sm font-medium">
                         {date.toLocaleDateString("pt-BR", {
                           day: "numeric",
                           month: "long",
@@ -237,10 +237,10 @@ function Agendamento() {
                               type="button"
                               disabled={full}
                               onClick={() => setTime(slot)}
-                              className={`rounded-md border px-2 py-2 text-sm transition-colors ${
+                              className={`rounded-lg border px-2 py-2 text-sm font-medium transition ${
                                 time === slot
-                                  ? "border-primary bg-primary text-primary-foreground"
-                                  : "border-border bg-background hover:bg-accent"
+                                  ? "border-primary gradient-primary text-primary-foreground shadow"
+                                  : "border-border bg-card hover:border-primary/40 hover:bg-accent"
                               } disabled:cursor-not-allowed disabled:opacity-40`}
                             >
                               {slot}
@@ -253,11 +253,7 @@ function Agendamento() {
                 </div>
               </div>
 
-              <Button
-                variant="outline"
-                disabled={!date || !time}
-                onClick={() => setStep(2)}
-              >
+              <Button className="w-full sm:w-auto" disabled={!date || !time} onClick={() => setStep(2)}>
                 Seguinte
               </Button>
             </div>
@@ -327,7 +323,7 @@ function Agendamento() {
                 </div>
               </div>
 
-              <p className="text-sm text-primary">
+              <p className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-foreground/80">
                 Informar Pedido de Compras NUTRICAR (5 dígitos). Para agendar mais de um pedido por
                 carro, selecionar acima a quantidade de pedidos. Caso queira agendar mais de 1
                 veículo, realizar nova solicitação. Informar apenas os números. Horário para
@@ -400,11 +396,11 @@ function Agendamento() {
 
               {error && <p className="text-sm font-medium text-destructive">{error}</p>}
 
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-3 pt-2">
                 <Button variant="outline" onClick={() => setStep(1)} disabled={saving}>
                   Voltar
                 </Button>
-                <Button variant="outline" onClick={submit} disabled={saving}>
+                <Button onClick={submit} disabled={saving}>
                   {saving ? "Enviando..." : "Clique aqui para confirmar o agendamento"}
                 </Button>
               </div>

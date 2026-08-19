@@ -144,15 +144,20 @@ function AdminPage() {
   return (
     <NutricarShell>
       <div className="space-y-6">
-        <div className="flex items-center justify-between gap-4 bg-card/95 p-4 shadow">
-          <h1 className="text-xl font-bold">Painel do administrador</h1>
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 surface-card p-5">
+          <div className="min-w-0">
+            <h1 className="truncate text-xl font-bold tracking-tight">Painel do administrador</h1>
+            <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+              Regras e agendamentos
+            </p>
+          </div>
           <Button variant="outline" onClick={signOut}>
             Sair
           </Button>
         </div>
 
         {!roleQuery.isLoading && !isAdmin && (
-          <div className="space-y-3 bg-card/95 p-4 shadow">
+          <div className="space-y-3 surface-card p-5">
             <p className="text-sm text-destructive">
               Sua conta ainda não tem permissão de administrador.
             </p>
@@ -162,7 +167,7 @@ function AdminPage() {
         )}
 
         {isAdmin && form && (
-          <section className="space-y-4 bg-card/95 p-6 shadow">
+          <section className="space-y-4 surface-card p-6">
             <h2 className="text-lg font-semibold">Regras de agendamento</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div>
@@ -234,11 +239,11 @@ function AdminPage() {
         )}
 
         {isAdmin && (
-        <section className="space-y-3 bg-card/95 p-6 shadow">
+        <section className="space-y-3 surface-card p-6">
           <h2 className="text-lg font-semibold">Agendamentos</h2>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px] text-left text-sm">
-              <thead className="border-b border-border text-xs uppercase text-muted-foreground">
+              <thead className="border-b border-border text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>
                   <th className="py-2">Data</th>
                   <th>Hora</th>
@@ -254,7 +259,7 @@ function AdminPage() {
               </thead>
               <tbody>
                 {(appointmentsQuery.data ?? []).map((a) => (
-                  <tr key={a.id} className="border-b border-border/60">
+                  <tr key={a.id} className="border-b border-border/60 transition-colors hover:bg-secondary/50">
                     <td className="py-2">
                       {new Date(`${a.scheduled_date}T00:00:00`).toLocaleDateString("pt-BR")}
                     </td>
