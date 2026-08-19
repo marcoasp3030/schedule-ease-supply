@@ -127,7 +127,7 @@ function Agendamento() {
       _time: `${time}:00`,
       _email: email.trim(),
       _supplier: supplier,
-      _other: other.trim() || null,
+      _other: other.trim(),
       _orders: orders,
       _purchase_order: purchaseOrder.trim(),
       _items: Number(items),
