@@ -12,6 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   SERVICES,
   buildSlots,
+  earliestAllowed,
+  slotDateTime,
   fetchAvailability,
   fetchSettings,
   fetchSuppliers,
