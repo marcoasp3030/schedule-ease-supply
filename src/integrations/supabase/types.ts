@@ -14,16 +14,174 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      appointments: {
+        Row: {
+          box_volume: number
+          created_at: string
+          email: string
+          id: string
+          orders_count: number
+          other_supplier_name: string | null
+          purchase_order: string
+          scheduled_date: string
+          scheduled_time: string
+          service_type: string
+          status: string
+          supplier_name: string
+          total_items: number
+          updated_at: string
+          vehicle_type: string
+        }
+        Insert: {
+          box_volume: number
+          created_at?: string
+          email: string
+          id?: string
+          orders_count: number
+          other_supplier_name?: string | null
+          purchase_order: string
+          scheduled_date: string
+          scheduled_time: string
+          service_type: string
+          status?: string
+          supplier_name: string
+          total_items: number
+          updated_at?: string
+          vehicle_type: string
+        }
+        Update: {
+          box_volume?: number
+          created_at?: string
+          email?: string
+          id?: string
+          orders_count?: number
+          other_supplier_name?: string | null
+          purchase_order?: string
+          scheduled_date?: string
+          scheduled_time?: string
+          service_type?: string
+          status?: string
+          supplier_name?: string
+          total_items?: number
+          updated_at?: string
+          vehicle_type?: string
+        }
+        Relationships: []
+      }
+      schedule_settings: {
+        Row: {
+          allow_weekend: boolean
+          end_hour: number
+          id: boolean
+          max_per_day: number
+          max_per_slot: number
+          slot_minutes: number
+          start_hour: number
+          updated_at: string
+        }
+        Insert: {
+          allow_weekend?: boolean
+          end_hour?: number
+          id?: boolean
+          max_per_day?: number
+          max_per_slot?: number
+          slot_minutes?: number
+          start_hour?: number
+          updated_at?: string
+        }
+        Update: {
+          allow_weekend?: boolean
+          end_hour?: number
+          id?: boolean
+          max_per_day?: number
+          max_per_slot?: number
+          slot_minutes?: number
+          start_hour?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      suppliers: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_appointment: {
+        Args: {
+          _boxes: number
+          _date: string
+          _email: string
+          _items: number
+          _orders: number
+          _other: string
+          _purchase_order: string
+          _service_type: string
+          _supplier: string
+          _time: string
+          _vehicle: string
+        }
+        Returns: string
+      }
+      day_availability: {
+        Args: { _from: string; _to: string }
+        Returns: {
+          scheduled_date: string
+          scheduled_time: string
+          total: number
+        }[]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +308,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
