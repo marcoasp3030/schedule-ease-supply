@@ -155,6 +155,9 @@ function AdminPage() {
             <Button asChild variant="secondary">
               <Link to="/admin/entregas">Entregas agendadas</Link>
             </Button>
+            <Button asChild variant="secondary">
+              <Link to="/admin/relatorios">Relatórios</Link>
+            </Button>
             <Button variant="outline" onClick={signOut}>
               Sair
             </Button>
