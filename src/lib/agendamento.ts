@@ -7,6 +7,7 @@ export type Settings = {
   end_hour: number;
   slot_minutes: number;
   max_per_slot: number;
+  min_advance_hours: number;
 };
 
 export type Availability = {
@@ -49,10 +50,25 @@ export function normalizeTime(t: string) {
 export async function fetchSettings(): Promise<Settings> {
   const { data, error } = await supabase
     .from("schedule_settings")
-    .select("max_per_day, allow_weekend, start_hour, end_hour, slot_minutes, max_per_slot")
+    .select(
+      "max_per_day, allow_weekend, start_hour, end_hour, slot_minutes, max_per_slot, min_advance_hours",
+    )
     .maybeSingle();
   if (error) throw error;
   return data as Settings;
+}
+
+/** Instante mínimo permitido, considerando a antecedência exigida. */
+export function earliestAllowed(s: Settings) {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() + (s.min_advance_hours ?? 0) * 60);
+  return d;
+}
+
+export function slotDateTime(isoDate: string, slot: string) {
+  const [y, m, d] = isoDate.split("-").map(Number);
+  const [hh, mm] = slot.split(":").map(Number);
+  return new Date(y, (m ?? 1) - 1, d, hh, mm, 0, 0);
 }
 
 export async function fetchSuppliers() {
