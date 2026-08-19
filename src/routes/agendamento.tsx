@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ptBR } from "date-fns/locale";
+import { CalendarDays, Clock } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -205,53 +206,101 @@ function Agendamento() {
                   Selecione uma data e horário disponível{" "}
                   <span className="italic font-normal text-destructive">(obrigatório)</span>
                 </Label>
-                <div className="mt-2 overflow-hidden rounded-xl border border-border bg-background shadow-sm">
-                  <Calendar
-                    mode="single"
-                    locale={ptBR}
-                    month={month}
-                    onMonthChange={setMonth}
-                    selected={date}
-                    onSelect={(d) => {
-                      setDate(d);
-                      setTime(null);
-                    }}
-                    disabled={isDayDisabled}
-                    className="pointer-events-auto p-3"
-                  />
-                  {date && settings && (
-                    <div className="border-t border-border bg-secondary/60 p-4">
-                      <p className="text-center text-sm font-medium">
-                        {date.toLocaleDateString("pt-BR", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}
-                      </p>
-                      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                        {slots.map((slot) => {
-                          const full = (takenSlots.get(slot) ?? 0) >= settings.max_per_slot;
-                          return (
-                            <button
-                              key={slot}
-                              type="button"
-                              disabled={full}
-                              onClick={() => setTime(slot)}
-                              className={`rounded-lg border px-2 py-2 text-sm font-medium transition ${
-                                time === slot
-                                  ? "border-primary gradient-primary text-primary-foreground shadow"
-                                  : "border-border bg-card hover:border-primary/40 hover:bg-accent"
-                              } disabled:cursor-not-allowed disabled:opacity-40`}
-                            >
-                              {slot}
-                            </button>
-                          );
-                        })}
-                      </div>
+
+                <div className="mt-3 grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
+                  <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+                    <div className="flex items-center gap-2 border-b border-border bg-secondary/60 px-4 py-3">
+                      <CalendarDays className="size-4 shrink-0 text-primary" />
+                      <span className="text-sm font-semibold">Escolha a data da entrega</span>
                     </div>
-                  )}
+                    <Calendar
+                      mode="single"
+                      locale={ptBR}
+                      month={month}
+                      onMonthChange={setMonth}
+                      selected={date}
+                      onSelect={(d) => {
+                        setDate(d);
+                        setTime(null);
+                      }}
+                      disabled={isDayDisabled}
+                      className="pointer-events-auto w-full p-4 [--cell-size:2.6rem]"
+                      classNames={{
+                        root: "w-full",
+                        month: "flex w-full flex-col gap-3",
+                        caption_label: "text-sm font-semibold capitalize",
+                        weekday:
+                          "flex-1 select-none text-[0.7rem] font-semibold uppercase tracking-wide text-muted-foreground",
+                        day: "group/day relative aspect-square h-full w-full select-none p-0.5 text-center",
+                      }}
+                    />
+                    <div className="flex flex-wrap items-center gap-4 border-t border-border px-4 py-3 text-[11px] text-muted-foreground">
+                      <span className="flex items-center gap-1.5">
+                        <span className="size-2.5 rounded-full bg-primary" /> Selecionado
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="size-2.5 rounded-full border border-border bg-card" />{" "}
+                        Disponível
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="size-2.5 rounded-full bg-muted" /> Indisponível
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+                    <div className="flex items-center gap-2">
+                      <Clock className="size-4 shrink-0 text-primary" />
+                      <span className="text-sm font-semibold">Horários</span>
+                    </div>
+                    {date && settings ? (
+                      <>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {date.toLocaleDateString("pt-BR", {
+                            weekday: "long",
+                            day: "numeric",
+                            month: "long",
+                          })}
+                        </p>
+                        <div className="mt-3 grid max-h-72 grid-cols-3 gap-2 overflow-y-auto pr-1 lg:grid-cols-2">
+                          {slots.map((slot) => {
+                            const full = (takenSlots.get(slot) ?? 0) >= settings.max_per_slot;
+                            return (
+                              <button
+                                key={slot}
+                                type="button"
+                                disabled={full}
+                                onClick={() => setTime(slot)}
+                                className={`rounded-lg border px-2 py-2.5 text-sm font-medium transition ${
+                                  time === slot
+                                    ? "border-primary gradient-primary text-primary-foreground shadow"
+                                    : "border-border bg-background hover:-translate-y-0.5 hover:border-primary/50 hover:bg-accent"
+                                } disabled:cursor-not-allowed disabled:border-dashed disabled:opacity-40 disabled:hover:translate-y-0`}
+                              >
+                                {slot}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </>
+                    ) : (
+                      <p className="mt-3 rounded-lg border border-dashed border-border bg-secondary/40 p-4 text-center text-xs text-muted-foreground">
+                        Escolha um dia no calendário para ver os horários disponíveis.
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
+
+              {date && time && (
+                <div className="flex items-center gap-2 rounded-xl border border-primary/25 bg-primary/10 px-4 py-3 text-sm">
+                  <CalendarDays className="size-4 shrink-0 text-primary" />
+                  <span>
+                    Selecionado: <strong>{date.toLocaleDateString("pt-BR")}</strong> às{" "}
+                    <strong>{time}</strong>
+                  </span>
+                </div>
+              )}
 
               <Button className="w-full sm:w-auto" disabled={!date || !time} onClick={() => setStep(2)}>
                 Seguinte
