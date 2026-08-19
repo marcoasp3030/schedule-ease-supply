@@ -155,9 +155,11 @@ function Agendamento() {
         setSupplier("OUTROS");
         setOther(name.slice(0, 200));
       }
-      setCnpjStatus(`Razão social: ${name}`);
+      setRazaoSocial(name);
+      setCnpjStatus(null);
     } catch {
-      setCnpjStatus("CNPJ não encontrado. Selecione a empresa manualmente.");
+      setRazaoSocial("");
+      setCnpjStatus("CNPJ não encontrado. Verifique o número informado.");
     } finally {
       setCnpjLoading(false);
     }
@@ -166,12 +168,8 @@ function Agendamento() {
   async function submit() {
     setError(null);
     if (!date || !time) return;
-    if (!email || !supplier || !purchaseOrder || !items || !boxes || !vehicle) {
+    if (!email || !razaoSocial || !purchaseOrder || !items || !boxes || !vehicle) {
       setError("Preencha todos os campos obrigatórios.");
-      return;
-    }
-    if (supplier === "OUTROS" && !other.trim()) {
-      setError("Informe o nome da empresa no campo OUTROS.");
       return;
     }
     setSaving(true);
