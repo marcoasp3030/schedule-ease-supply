@@ -68,6 +68,39 @@ export type Database = {
         }
         Relationships: []
       }
+      email_templates: {
+        Row: {
+          active: boolean
+          body: string
+          created_at: string
+          id: string
+          key: string
+          subject: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          body: string
+          created_at?: string
+          id?: string
+          key: string
+          subject: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          body?: string
+          created_at?: string
+          id?: string
+          key?: string
+          subject?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       schedule_settings: {
         Row: {
           allow_weekend: boolean
@@ -98,6 +131,48 @@ export type Database = {
           slot_minutes?: number
           start_hour?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      smtp_settings: {
+        Row: {
+          admin_recipients: string
+          enabled: boolean
+          from_email: string
+          from_name: string
+          host: string
+          id: boolean
+          password: string
+          port: number
+          updated_at: string
+          use_tls: boolean
+          username: string
+        }
+        Insert: {
+          admin_recipients?: string
+          enabled?: boolean
+          from_email?: string
+          from_name?: string
+          host?: string
+          id?: boolean
+          password?: string
+          port?: number
+          updated_at?: string
+          use_tls?: boolean
+          username?: string
+        }
+        Update: {
+          admin_recipients?: string
+          enabled?: boolean
+          from_email?: string
+          from_name?: string
+          host?: string
+          id?: boolean
+          password?: string
+          port?: number
+          updated_at?: string
+          use_tls?: boolean
+          username?: string
         }
         Relationships: []
       }
@@ -140,6 +215,30 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      vehicle_types: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }

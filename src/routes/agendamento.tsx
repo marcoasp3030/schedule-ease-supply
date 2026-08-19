@@ -11,11 +11,11 @@ import { NutricarShell } from "@/components/nutricar-shell";
 import { supabase } from "@/integrations/supabase/client";
 import {
   SERVICES,
-  VEHICLES,
   buildSlots,
   fetchAvailability,
   fetchSettings,
   fetchSuppliers,
+  fetchVehicleTypes,
   normalizeTime,
   toISODate,
 } from "@/lib/agendamento";
@@ -67,6 +67,7 @@ function Agendamento() {
 
   const settingsQuery = useQuery({ queryKey: ["settings"], queryFn: fetchSettings });
   const suppliersQuery = useQuery({ queryKey: ["suppliers"], queryFn: fetchSuppliers });
+  const vehiclesQuery = useQuery({ queryKey: ["vehicle_types"], queryFn: fetchVehicleTypes });
 
   const range = useMemo(() => {
     const from = new Date(month.getFullYear(), month.getMonth(), 1);
@@ -494,8 +495,8 @@ function Agendamento() {
                   onChange={(e) => setVehicle(e.target.value)}
                 >
                   <option value="">Selecione o tipo de veículo</option>
-                  {VEHICLES.map((v) => (
-                    <option key={v}>{v}</option>
+                  {(vehiclesQuery.data ?? []).map((v) => (
+                    <option key={v.id}>{v.name}</option>
                   ))}
                 </select>
               </div>

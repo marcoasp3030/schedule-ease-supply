@@ -26,7 +26,6 @@ function AuthPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mode, setMode] = useState<"login" | "signup">("login");
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -34,21 +33,16 @@ function AuthPage() {
     e.preventDefault();
     setMessage(null);
     setLoading(true);
-    if (mode === "login") {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      setLoading(false);
-      if (error) return setMessage(error.message);
-      navigate({ to: "/admin" });
-    } else {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { emailRedirectTo: `${window.location.origin}/admin` },
-      });
-      setLoading(false);
-      if (error) return setMessage(error.message);
-      setMessage("Conta criada. Confirme o e-mail para acessar.");
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    if (error) {
+      return setMessage(
+        error.message.toLowerCase().includes("invalid login")
+          ? "E-mail ou senha inválidos."
+          : error.message,
+      );
     }
+    navigate({ to: "/admin" });
   }
 
   return (
@@ -86,15 +80,11 @@ function AuthPage() {
         </div>
         {message && <p className="text-sm text-destructive">{message}</p>}
         <Button type="submit" className="w-full" disabled={loading}>
-          {mode === "login" ? "Entrar" : "Criar conta"}
+          Entrar
         </Button>
-        <button
-          type="button"
-          className="w-full text-sm text-muted-foreground underline"
-          onClick={() => setMode(mode === "login" ? "signup" : "login")}
-        >
-          {mode === "login" ? "Criar conta de administrador" : "Já tenho conta"}
-        </button>
+        <p className="text-center text-xs text-muted-foreground">
+          Novos acessos são liberados apenas pela equipe de TI da NUTRICAR.
+        </p>
       </form>
     </NutricarShell>
   );
