@@ -211,9 +211,7 @@ function Agendamento() {
                   <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
                     <div className="flex items-center gap-2 border-b border-border bg-secondary/60 px-4 py-3">
                       <CalendarDays className="size-4 shrink-0 text-primary" />
-                      <span className="text-sm font-semibold capitalize">
-                        {month.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
-                      </span>
+                      <span className="text-sm font-semibold">Escolha a data da entrega</span>
                     </div>
                     <Calendar
                       mode="single"
