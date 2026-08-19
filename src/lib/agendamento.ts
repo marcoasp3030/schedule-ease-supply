@@ -66,9 +66,9 @@ export function earliestAllowed(s: Settings) {
 }
 
 export function slotDateTime(isoDate: string, slot: string) {
-  const [y, m, d] = isoDate.split("-").map(Number);
-  const [hh, mm] = slot.split(":").map(Number);
-  return new Date(y, (m ?? 1) - 1, d, hh, mm, 0, 0);
+  const [y = 1970, m = 1, d = 1] = isoDate.split("-").map(Number);
+  const [hh = 0, mm = 0] = slot.split(":").map(Number);
+  return new Date(y, m - 1, d, hh, mm, 0, 0);
 }
 
 export async function fetchSuppliers() {
