@@ -3,11 +3,18 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowDownUp,
-  CalendarDays,
+  Boxes,
+  CalendarClock,
   CheckCircle2,
   Clock,
   Download,
+  FileText,
+  Hash,
+  Mail,
+  Package,
   RotateCcw,
+  Search,
+  Truck,
   XCircle,
 } from "lucide-react";
 import * as XLSX from "xlsx";
@@ -400,91 +407,148 @@ function EntregasPage() {
             </Button>
           </div>
 
-          <p className="text-sm text-muted-foreground">
-            {visible.length} entrega(s) · {totals.items} itens · {totals.boxes} caixas
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/60 bg-background/60 px-4 py-3 text-sm">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Package className="size-4" />
+              <span>
+                <strong className="text-foreground">{visible.length}</strong> entrega(s) encontrada(s)
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-4">
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <Boxes className="size-4" />
+                <strong className="text-foreground">{totals.items}</strong> itens
+              </span>
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <Package className="size-4" />
+                <strong className="text-foreground">{totals.boxes}</strong> caixas
+              </span>
+            </div>
+          </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[880px] text-left text-sm">
-              <thead className="border-b border-border text-xs uppercase tracking-wider text-muted-foreground">
-                <tr>
-                  <th className="py-2">Data / hora</th>
-                  <th>Empresa</th>
-                  <th>E-mail</th>
-                  <th>Pedido</th>
-                  <th>Itens</th>
-                  <th>Caixas</th>
-                  <th>Veículo</th>
-                  <th>Status</th>
-                  <th className="text-right">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pageRows.map((a) => {
-                  const st = statusOf(a.status);
-                  return (
-                    <tr
-                      key={a.id}
-                      className="border-b border-border/60 transition-colors hover:bg-secondary/50"
-                    >
-                      <td className="py-3">
-                        <span className="flex items-center gap-2">
-                          <CalendarDays className="size-4 text-muted-foreground" />
-                          {new Date(`${a.scheduled_date}T00:00:00`).toLocaleDateString("pt-BR")}
-                          <span className="text-muted-foreground">{a.scheduled_time.slice(0, 5)}</span>
-                        </span>
-                      </td>
-                      <td>{a.other_supplier_name || a.supplier_name}</td>
-                      <td>{a.email}</td>
-                      <td>{a.purchase_order}</td>
-                      <td>{a.total_items}</td>
-                      <td>{a.box_volume}</td>
-                      <td>{a.vehicle_type}</td>
-                      <td>
-                        <span
-                          className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${STATUS_META[st].className}`}
+          <div className="grid gap-3">
+            {pageRows.map((a) => {
+              const st = statusOf(a.status);
+              const StatusIcon =
+                st === "pendente"
+                  ? Clock
+                  : st === "concluida"
+                    ? CheckCircle2
+                    : XCircle;
+              return (
+                <div
+                  key={a.id}
+                  className="group rounded-xl border border-border/60 bg-background/80 p-4 shadow-sm transition-all hover:border-primary/30 hover:bg-background hover:shadow-md"
+                >
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex min-w-0 items-start gap-3">
+                      <div className="grid shrink-0 place-items-center rounded-xl bg-primary/10 p-2.5 text-primary">
+                        <CalendarClock className="size-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-semibold text-foreground">
+                            {new Date(`${a.scheduled_date}T00:00:00`).toLocaleDateString("pt-BR")}
+                          </span>
+                          <span className="text-sm font-medium text-muted-foreground">·</span>
+                          <span className="text-sm font-medium text-muted-foreground">
+                            {a.scheduled_time.slice(0, 5)}
+                          </span>
+                          <span
+                            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${STATUS_META[st].className}`}
+                          >
+                            <StatusIcon className="size-3.5" />
+                            {STATUS_META[st].label}
+                          </span>
+                        </div>
+                        <p className="mt-1 truncate text-base font-semibold text-foreground">
+                          {a.other_supplier_name || a.supplier_name}
+                        </p>
+                        <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                          <Mail className="size-3.5" />
+                          <span className="truncate">{a.email}</span>
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 flex-wrap items-center gap-2">
+                      {st === "pendente" ? (
+                        <>
+                          <Button
+                            size="sm"
+                            className="h-8 gap-1.5"
+                            onClick={() => setStatus(a.id, "concluida")}
+                          >
+                            <CheckCircle2 className="size-4" /> Concluir
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 gap-1.5"
+                            onClick={() => setStatus(a.id, "cancelada")}
+                          >
+                            <XCircle className="size-4" /> Cancelar
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 gap-1.5"
+                          onClick={() => setStatus(a.id, "confirmado")}
                         >
-                          {STATUS_META[st].label}
-                        </span>
-                      </td>
-                      <td className="py-2 text-right">
-                        <span className="flex justify-end gap-2">
-                          {st === "pendente" ? (
-                            <>
-                              <Button size="sm" onClick={() => setStatus(a.id, "concluida")}>
-                                Concluir
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setStatus(a.id, "cancelada")}
-                              >
-                                Cancelar
-                              </Button>
-                            </>
-                          ) : (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => setStatus(a.id, "confirmado")}
-                            >
-                              Reabrir
-                            </Button>
-                          )}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {pageRows.length === 0 && (
-                  <tr>
-                    <td colSpan={9} className="py-8 text-center text-muted-foreground">
-                      Nenhuma entrega encontrada.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                          <RotateCcw className="size-4" /> Reabrir
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border/50 pt-4 sm:grid-cols-4">
+                    <div className="space-y-1">
+                      <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                        <FileText className="size-3.5" /> Pedido
+                      </p>
+                      <p className="text-sm font-semibold text-foreground">
+                        {a.purchase_order || "—"}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                        <Hash className="size-3.5" /> Itens
+                      </p>
+                      <p className="text-sm font-semibold text-foreground">{a.total_items}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                        <Boxes className="size-3.5" /> Caixas
+                      </p>
+                      <p className="text-sm font-semibold text-foreground">{a.box_volume}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                        <Truck className="size-3.5" /> Veículo
+                      </p>
+                      <p className="text-sm font-semibold text-foreground">{a.vehicle_type}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            {pageRows.length === 0 && (
+              <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-background/50 px-6 py-12 text-center">
+                <div className="grid place-items-center rounded-2xl bg-muted p-3">
+                  <Search className="size-6 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">Nenhuma entrega encontrada</p>
+                  <p className="text-xs text-muted-foreground">
+                    Tente ajustar os filtros ou o período selecionado.
+                  </p>
+                </div>
+                <Button size="sm" variant="outline" onClick={clearFilters}>
+                  <RotateCcw className="mr-2 size-4" /> Limpar filtros
+                </Button>
+              </div>
+            )}
           </div>
 
           {totalPages > 1 && (
