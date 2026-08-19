@@ -108,6 +108,7 @@ export type Database = {
           id: boolean
           max_per_day: number
           max_per_slot: number
+          min_advance_hours: number
           slot_minutes: number
           start_hour: number
           updated_at: string
@@ -118,6 +119,7 @@ export type Database = {
           id?: boolean
           max_per_day?: number
           max_per_slot?: number
+          min_advance_hours?: number
           slot_minutes?: number
           start_hour?: number
           updated_at?: string
@@ -128,6 +130,7 @@ export type Database = {
           id?: boolean
           max_per_day?: number
           max_per_slot?: number
+          min_advance_hours?: number
           slot_minutes?: number
           start_hour?: number
           updated_at?: string

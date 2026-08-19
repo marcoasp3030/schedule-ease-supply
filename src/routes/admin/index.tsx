@@ -111,6 +111,7 @@ function AdminPage() {
         end_hour: form.end_hour,
         slot_minutes: form.slot_minutes,
         max_per_slot: form.max_per_slot,
+        min_advance_hours: form.min_advance_hours,
       })
       .eq("id", true);
     if (error) return setSaved(`Erro: ${error.message}`);
@@ -236,6 +237,22 @@ function AdminPage() {
                   value={form.end_hour}
                   onChange={(e) => setForm({ ...form, end_hour: Number(e.target.value) })}
                 />
+              </div>
+              <div>
+                <Label>Antecedência mínima (horas)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  max={720}
+                  className="mt-2"
+                  value={form.min_advance_hours ?? 0}
+                  onChange={(e) =>
+                    setForm({ ...form, min_advance_hours: Math.max(0, Number(e.target.value)) })
+                  }
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Ex.: 3 = o fornecedor só agenda horários a partir de 3h a partir de agora.
+                </p>
               </div>
               <div className="flex items-center gap-3 pt-6">
                 <Switch
