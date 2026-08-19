@@ -325,8 +325,9 @@ function Agendamento() {
                         <div className="mt-3 grid max-h-72 grid-cols-3 gap-2 overflow-y-auto pr-1 lg:grid-cols-2">
                           {slots.map((slot) => {
                             const full = (takenSlots.get(slot) ?? 0) >= settings.max_per_slot;
-                            const tooSoon =
-                              slotDateTime(selectedISO, slot) < earliestAllowed(settings);
+                            const tooSoon = selectedISO
+                              ? slotDateTime(selectedISO, slot) < earliestAllowed(settings)
+                              : false;
                             return (
                               <button
                                 key={slot}
