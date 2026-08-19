@@ -283,9 +283,14 @@ function EntregasPage() {
               Acompanhamento e status
             </p>
           </div>
-          <Button asChild variant="outline">
-            <Link to="/admin">Voltar ao painel</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={exportExcel} disabled={visible.length === 0}>
+              <Download className="mr-2 size-4" /> Excel
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/admin">Voltar ao painel</Link>
+            </Button>
+          </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
@@ -312,6 +317,66 @@ function EntregasPage() {
         </div>
 
         <section className="space-y-4 surface-card p-6">
+          <div className="grid gap-4 md:grid-cols-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="de">De</Label>
+              <Input id="de" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="ate">Até</Label>
+              <Input id="ate" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="veiculo">Veículo</Label>
+              <select
+                id="veiculo"
+                value={vehicle}
+                onChange={(e) => setVehicle(e.target.value)}
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="todos">Todos</option>
+                {vehicles.map((v) => (
+                  <option key={v} value={v}>
+                    {v}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="busca">Buscar</Label>
+              <Input
+                id="busca"
+                placeholder="Empresa, e-mail ou pedido"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+              Período rápido
+            </span>
+            <Button size="sm" variant="secondary" onClick={() => applyPreset(0)}>
+              Hoje
+            </Button>
+            <Button size="sm" variant="secondary" onClick={() => applyPreset(7)}>
+              Próximos 7 dias
+            </Button>
+            <Button size="sm" variant="secondary" onClick={() => applyPreset(30)}>
+              Próximos 30 dias
+            </Button>
+            <Button size="sm" variant="secondary" onClick={() => applyPreset(-30)}>
+              Últimos 30 dias
+            </Button>
+            <Button size="sm" variant="secondary" onClick={() => applyPreset("mes")}>
+              Mês atual
+            </Button>
+            <Button size="sm" variant="ghost" onClick={clearFilters}>
+              <RotateCcw className="mr-2 size-4" /> Limpar
+            </Button>
+          </div>
+
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap gap-2">
               {(["todas", "pendente", "concluida", "cancelada"] as const).map((key) => (
@@ -325,13 +390,19 @@ function EntregasPage() {
                 </Button>
               ))}
             </div>
-            <Input
-              className="w-full sm:w-64"
-              placeholder="Buscar empresa, e-mail ou pedido"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setSortDir(sortDir === "desc" ? "asc" : "desc")}
+            >
+              <ArrowDownUp className="mr-2 size-4" />
+              {sortDir === "desc" ? "Mais recentes" : "Mais antigas"}
+            </Button>
           </div>
+
+          <p className="text-sm text-muted-foreground">
+            {visible.length} entrega(s) · {totals.items} itens · {totals.boxes} caixas
+          </p>
 
           <div className="overflow-x-auto">
             <table className="w-full min-w-[880px] text-left text-sm">
@@ -349,7 +420,7 @@ function EntregasPage() {
                 </tr>
               </thead>
               <tbody>
-                {visible.map((a) => {
+                {pageRows.map((a) => {
                   const st = statusOf(a.status);
                   return (
                     <tr
@@ -377,27 +448,35 @@ function EntregasPage() {
                         </span>
                       </td>
                       <td className="py-2 text-right">
-                        {st === "pendente" ? (
-                          <span className="flex justify-end gap-2">
-                            <Button size="sm" onClick={() => setStatus(a.id, "concluida")}>
-                              Concluir
-                            </Button>
+                        <span className="flex justify-end gap-2">
+                          {st === "pendente" ? (
+                            <>
+                              <Button size="sm" onClick={() => setStatus(a.id, "concluida")}>
+                                Concluir
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setStatus(a.id, "cancelada")}
+                              >
+                                Cancelar
+                              </Button>
+                            </>
+                          ) : (
                             <Button
                               size="sm"
-                              variant="outline"
-                              onClick={() => setStatus(a.id, "cancelada")}
+                              variant="ghost"
+                              onClick={() => setStatus(a.id, "confirmado")}
                             >
-                              Cancelar
+                              Reabrir
                             </Button>
-                          </span>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
-                        )}
+                          )}
+                        </span>
                       </td>
                     </tr>
                   );
                 })}
-                {visible.length === 0 && (
+                {pageRows.length === 0 && (
                   <tr>
                     <td colSpan={9} className="py-8 text-center text-muted-foreground">
                       Nenhuma entrega encontrada.
@@ -407,6 +486,32 @@ function EntregasPage() {
               </tbody>
             </table>
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm text-muted-foreground">
+                Página {currentPage} de {totalPages}
+              </span>
+              <span className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={currentPage <= 1}
+                  onClick={() => setPage(currentPage - 1)}
+                >
+                  Anterior
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setPage(currentPage + 1)}
+                >
+                  Próxima
+                </Button>
+              </span>
+            </div>
+          )}
         </section>
       </div>
     </NutricarShell>
