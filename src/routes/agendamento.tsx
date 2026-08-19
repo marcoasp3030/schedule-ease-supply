@@ -377,6 +377,25 @@ function Agendamento() {
               </div>
 
               <div>
+                <Label htmlFor="cnpj" className="font-bold">
+                  CNPJ do fornecedor
+                </Label>
+                <Input
+                  id="cnpj"
+                  inputMode="numeric"
+                  placeholder="00.000.000/0000-00"
+                  className="mt-2 max-w-[260px]"
+                  value={cnpj}
+                  onChange={(e) => handleCnpjChange(e.target.value)}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {cnpjLoading
+                    ? "Buscando razão social..."
+                    : (cnpjStatus ?? "Informe o CNPJ para preencher a razão social automaticamente.")}
+                </p>
+              </div>
+
+              <div>
                 <Label className="font-bold">
                   Fornecedores - Escolha abaixo a empresa a qual representa{" "}
                   <span className="italic font-normal text-destructive">(obrigatório)</span>
@@ -442,9 +461,10 @@ function Agendamento() {
                 <Input
                   id="po"
                   className="mt-2 max-w-[200px]"
+                  inputMode="numeric"
                   value={purchaseOrder}
-                  maxLength={100}
-                  onChange={(e) => setPurchaseOrder(e.target.value)}
+                  maxLength={20}
+                  onChange={(e) => setPurchaseOrder(onlyDigits(e.target.value))}
                 />
               </div>
 
@@ -456,11 +476,11 @@ function Agendamento() {
                   </Label>
                   <Input
                     id="items"
-                    type="number"
-                    min={1}
+                    inputMode="numeric"
                     className="mt-2"
                     value={items}
-                    onChange={(e) => setItems(e.target.value)}
+                    maxLength={6}
+                    onChange={(e) => setItems(onlyDigits(e.target.value))}
                   />
                 </div>
                 <div>
@@ -470,11 +490,11 @@ function Agendamento() {
                   </Label>
                   <Input
                     id="boxes"
-                    type="number"
-                    min={1}
+                    inputMode="numeric"
                     className="mt-2"
                     value={boxes}
-                    onChange={(e) => setBoxes(e.target.value)}
+                    maxLength={6}
+                    onChange={(e) => setBoxes(onlyDigits(e.target.value))}
                   />
                 </div>
               </div>
