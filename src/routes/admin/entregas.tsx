@@ -503,7 +503,7 @@ function EntregasPage() {
                     </div>
                   </div>
 
-                  <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border/50 pt-4 sm:grid-cols-4 lg:grid-cols-5">
+                  <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border/50 pt-4 sm:grid-cols-4">
                     <div className="space-y-1">
                       <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                         <FileText className="size-3.5" /> Pedido
@@ -529,16 +529,6 @@ function EntregasPage() {
                         <Truck className="size-3.5" /> Veículo
                       </p>
                       <p className="text-sm font-semibold text-foreground">{a.vehicle_type}</p>
-                    </div>
-                    <div className="col-span-2 space-y-1 sm:col-span-4 lg:col-span-1">
-                      <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        <CalendarDays className="size-3.5" /> Agendado
-                      </p>
-                      <p className="text-sm font-semibold text-foreground">
-                        {new Date(`${a.scheduled_date}T00:00:00`).toLocaleDateString("pt-BR", {
-                          weekday: "short",
-                        })}
-                      </p>
                     </div>
                   </div>
                 </div>
