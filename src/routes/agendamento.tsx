@@ -145,16 +145,19 @@ function Agendamento() {
   if (step === 3) {
     return (
       <NutricarShell>
-        <div className="mx-auto max-w-2xl space-y-6 text-center">
-          <div className="bg-card/90 px-6 py-5 shadow-lg">
-            <h1 className="text-2xl font-bold">Agendamento realizado com sucesso</h1>
-            {date && time && (
-              <p className="mt-2 text-sm text-muted-foreground">
-                {date.toLocaleDateString("pt-BR")} às {time} — {service}
-              </p>
-            )}
+        <div className="mx-auto max-w-xl surface-card p-10 text-center">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-full gradient-primary text-3xl text-primary-foreground">
+            ✓
           </div>
-          <Button onClick={() => navigate({ to: "/" })}>Voltar para inicio</Button>
+          <h1 className="mt-6 text-2xl font-bold">Agendamento realizado com sucesso</h1>
+          {date && time && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              {date.toLocaleDateString("pt-BR")} às {time} — {service}
+            </p>
+          )}
+          <Button className="mt-8" onClick={() => navigate({ to: "/" })}>
+            Voltar para inicio
+          </Button>
         </div>
       </NutricarShell>
     );
@@ -162,26 +165,24 @@ function Agendamento() {
 
   return (
     <NutricarShell>
-      <div className="flex flex-col items-start gap-6 lg:flex-row">
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
         <Link
           to="/"
-          className="inline-flex items-center justify-center rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card/80 px-4 py-2 text-sm font-medium text-foreground backdrop-blur transition hover:bg-card"
         >
-          Voltar para inicio
+          ← Voltar para inicio
         </Link>
 
-        <div className="w-full max-w-xl bg-card/95 p-6 shadow-xl">
-          <h1 className="text-xl text-muted-foreground">Agendamento de fornecedores</h1>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Passo <span className="text-primary">{step}</span> de 2
+        <div className="w-full surface-card p-6 sm:p-8">
+          <h1 className="text-2xl font-bold tracking-tight">Agendamento de fornecedores</h1>
+          <p className="mt-1 text-xs uppercase tracking-[0.16em] text-muted-foreground">
+            Passo <span className="font-semibold text-primary">{step}</span> de 2
           </p>
-          <div className="mt-2 h-4 w-full overflow-hidden rounded-full bg-muted">
+          <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-muted">
             <div
-              className="flex h-full items-center justify-center bg-primary text-[10px] text-primary-foreground transition-all"
+              className="h-full rounded-full gradient-primary transition-all duration-500"
               style={{ width: step === 1 ? "8%" : "50%" }}
-            >
-              {step === 1 ? "" : "50%"}
-            </div>
+            />
           </div>
 
           {step === 1 ? (
