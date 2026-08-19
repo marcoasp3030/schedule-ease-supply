@@ -113,8 +113,57 @@ function Agendamento() {
     return (dayTotals.get(toISODate(day)) ?? 0) >= settings.max_per_day;
   }
 
+  function onlyDigits(v: string) {
+    return v.replace(/\D/g, "");
+  }
+
+  function formatCnpj(v: string) {
+    const d = onlyDigits(v).slice(0, 14);
+    return d
+      .replace(/^(\d{2})(\d)/, "$1.$2")
+      .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/\.(\d{3})(\d)/, ".$1/$2")
+      .replace(/(\d{4})(\d)/, "$1-$2");
+  }
+
+  async function handleCnpjChange(value: string) {
+    const masked = formatCnpj(value);
+    setCnpj(masked);
+    const digits = onlyDigits(masked);
+    if (digits.length < 14) {
+      setCnpjStatus(null);
+      return;
+    }
+    setCnpjLoading(true);
+    setCnpjStatus(null);
+    try {
+      const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${digits}`);
+      if (!res.ok) throw new Error("not found");
+      const data = (await res.json()) as {
+        razao_social?: string;
+        nome_fantasia?: string;
+      };
+      const name = (data.razao_social || data.nome_fantasia || "").trim();
+      if (!name) throw new Error("empty");
+      const match = (suppliersQuery.data ?? []).find(
+        (s) => s.name.trim().toLowerCase() === name.toLowerCase(),
+      );
+      if (match) {
+        setSupplier(match.name);
+        setOther("");
+      } else {
+        setSupplier("OUTROS");
+        setOther(name.slice(0, 200));
+      }
+      setCnpjStatus(`Razão social: ${name}`);
+    } catch {
+      setCnpjStatus("CNPJ não encontrado. Selecione a empresa manualmente.");
+    } finally {
+      setCnpjLoading(false);
+    }
+  }
+
   async function submit() {
-    setError(null);
     setError(null);
     if (!date || !time) return;
     if (!email || !supplier || !purchaseOrder || !items || !boxes || !vehicle) {
