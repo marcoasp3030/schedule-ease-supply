@@ -9,7 +9,7 @@ import { NutricarShell } from "@/components/nutricar-shell";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchSettings, type Settings } from "@/lib/agendamento";
 
-export const Route = createFileRoute("/admin")({
+export const Route = createFileRoute("/admin/")({
   ssr: false,
   head: () => ({
     meta: [
