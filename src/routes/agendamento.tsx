@@ -112,6 +112,11 @@ function Agendamento() {
     if (day < today) return true;
     const dow = day.getDay();
     if (!settings.allow_weekend && (dow === 0 || dow === 6)) return true;
+    const lastSlot = buildSlots(settings).at(-1);
+    if (lastSlot) {
+      const end = slotDateTime(toISODate(day), lastSlot);
+      if (end < earliestAllowed(settings)) return true;
+    }
     return (dayTotals.get(toISODate(day)) ?? 0) >= settings.max_per_day;
   }
 
@@ -318,11 +323,18 @@ function Agendamento() {
                         <div className="mt-3 grid max-h-72 grid-cols-3 gap-2 overflow-y-auto pr-1 lg:grid-cols-2">
                           {slots.map((slot) => {
                             const full = (takenSlots.get(slot) ?? 0) >= settings.max_per_slot;
+                            const tooSoon =
+                              slotDateTime(selectedISO, slot) < earliestAllowed(settings);
                             return (
                               <button
                                 key={slot}
                                 type="button"
-                                disabled={full}
+                                disabled={full || tooSoon}
+                                title={
+                                  tooSoon
+                                    ? `Necessário agendar com ${settings.min_advance_hours}h de antecedência`
+                                    : undefined
+                                }
                                 onClick={() => setTime(slot)}
                                 className={`rounded-lg border px-2 py-2.5 text-sm font-medium transition ${
                                   time === slot
