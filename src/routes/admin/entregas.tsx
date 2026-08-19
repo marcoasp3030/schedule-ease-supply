@@ -15,7 +15,6 @@ import {
   Package,
   RotateCcw,
   Search,
-  Trash2,
   Truck,
   XCircle,
 } from "lucide-react";
