@@ -58,6 +58,7 @@ function Agendamento() {
   const [cnpjStatus, setCnpjStatus] = useState<string | null>(null);
   const [cnpjLoading, setCnpjLoading] = useState(false);
   const [other, setOther] = useState("");
+  const [razaoSocial, setRazaoSocial] = useState("");
   const [orders, setOrders] = useState(1);
   const [purchaseOrder, setPurchaseOrder] = useState("");
   const [items, setItems] = useState("");
