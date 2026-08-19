@@ -57,6 +57,21 @@ function AdminPage() {
     });
   }, [navigate]);
 
+  const roleQuery = useQuery({
+    queryKey: ["is-admin"],
+    enabled: ready,
+    queryFn: async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return false;
+      const { data, error } = await supabase.rpc("has_role", {
+        _user_id: userData.user.id,
+        _role: "admin",
+      });
+      if (error) throw error;
+      return Boolean(data);
+    },
+  });
+
   const settingsQuery = useQuery({
     queryKey: ["settings"],
     queryFn: fetchSettings,
@@ -115,9 +130,16 @@ function AdminPage() {
     navigate({ to: "/auth", replace: true });
   }
 
+  async function claimAdmin() {
+    const { data, error } = await supabase.rpc("claim_admin");
+    if (error) return setSaved(`Erro: ${error.message}`);
+    if (!data) return setSaved("Já existe um administrador definido.");
+    queryClient.invalidateQueries();
+  }
+
   if (!ready) return null;
 
-  const isAdmin = !settingsQuery.isLoading && !appointmentsQuery.error;
+  const isAdmin = roleQuery.data === true;
 
   return (
     <NutricarShell>
@@ -129,13 +151,17 @@ function AdminPage() {
           </Button>
         </div>
 
-        {!isAdmin && (
-          <p className="bg-card/95 p-4 text-sm text-destructive shadow">
-            Sua conta não tem permissão de administrador.
-          </p>
+        {!roleQuery.isLoading && !isAdmin && (
+          <div className="space-y-3 bg-card/95 p-4 shadow">
+            <p className="text-sm text-destructive">
+              Sua conta ainda não tem permissão de administrador.
+            </p>
+            <Button onClick={claimAdmin}>Tornar-me administrador (primeiro acesso)</Button>
+            {saved && <p className="text-sm text-muted-foreground">{saved}</p>}
+          </div>
         )}
 
-        {form && (
+        {isAdmin && form && (
           <section className="space-y-4 bg-card/95 p-6 shadow">
             <h2 className="text-lg font-semibold">Regras de agendamento</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -207,6 +233,7 @@ function AdminPage() {
           </section>
         )}
 
+        {isAdmin && (
         <section className="space-y-3 bg-card/95 p-6 shadow">
           <h2 className="text-lg font-semibold">Agendamentos</h2>
           <div className="overflow-x-auto">
@@ -263,6 +290,7 @@ function AdminPage() {
             </table>
           </div>
         </section>
+        )}
       </div>
     </NutricarShell>
   );
