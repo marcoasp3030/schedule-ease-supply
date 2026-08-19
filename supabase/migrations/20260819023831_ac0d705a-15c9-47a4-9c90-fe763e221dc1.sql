@@ -1,0 +1,1 @@
+DELETE FROM public.appointments WHERE purchase_order = '123456' AND supplier_name = 'AMBEV S.A. (teste)';
