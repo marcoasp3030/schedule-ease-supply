@@ -58,6 +58,7 @@ function Agendamento() {
   const [cnpjStatus, setCnpjStatus] = useState<string | null>(null);
   const [cnpjLoading, setCnpjLoading] = useState(false);
   const [other, setOther] = useState("");
+  const [razaoSocial, setRazaoSocial] = useState("");
   const [orders, setOrders] = useState(1);
   const [purchaseOrder, setPurchaseOrder] = useState("");
   const [items, setItems] = useState("");
@@ -155,9 +156,11 @@ function Agendamento() {
         setSupplier("OUTROS");
         setOther(name.slice(0, 200));
       }
-      setCnpjStatus(`Razão social: ${name}`);
+      setRazaoSocial(name);
+      setCnpjStatus(null);
     } catch {
-      setCnpjStatus("CNPJ não encontrado. Selecione a empresa manualmente.");
+      setRazaoSocial("");
+      setCnpjStatus("CNPJ não encontrado. Verifique o número informado.");
     } finally {
       setCnpjLoading(false);
     }
@@ -166,12 +169,8 @@ function Agendamento() {
   async function submit() {
     setError(null);
     if (!date || !time) return;
-    if (!email || !supplier || !purchaseOrder || !items || !boxes || !vehicle) {
+    if (!email || !razaoSocial || !purchaseOrder || !items || !boxes || !vehicle) {
       setError("Preencha todos os campos obrigatórios.");
-      return;
-    }
-    if (supplier === "OUTROS" && !other.trim()) {
-      setError("Informe o nome da empresa no campo OUTROS.");
       return;
     }
     setSaving(true);
@@ -378,7 +377,8 @@ function Agendamento() {
 
               <div>
                 <Label htmlFor="cnpj" className="font-bold">
-                  CNPJ do fornecedor
+                  CNPJ do fornecedor{" "}
+                  <span className="italic font-normal text-destructive">(obrigatório)</span>
                 </Label>
                 <Input
                   id="cnpj"
@@ -396,31 +396,15 @@ function Agendamento() {
               </div>
 
               <div>
-                <Label className="font-bold">
-                  Fornecedores - Escolha abaixo a empresa a qual representa{" "}
-                  <span className="italic font-normal text-destructive">(obrigatório)</span>
+                <Label htmlFor="razao" className="font-bold">
+                  Fornecedores - Empresa a qual representa
                 </Label>
-                <select
-                  className={`${fieldClass} mt-2`}
-                  value={supplier}
-                  onChange={(e) => setSupplier(e.target.value)}
-                >
-                  <option value="">Selecione o nome da empresa</option>
-                  {(suppliersQuery.data ?? []).map((s) => (
-                    <option key={s.id} value={s.name}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <Label className="font-bold uppercase">Opção outros informar nome abaixo.</Label>
                 <Input
-                  className="mt-2"
-                  value={other}
-                  maxLength={200}
-                  onChange={(e) => setOther(e.target.value)}
+                  id="razao"
+                  readOnly
+                  className="mt-2 bg-muted/60"
+                  placeholder="Preenchido automaticamente pelo CNPJ"
+                  value={razaoSocial}
                 />
               </div>
 
