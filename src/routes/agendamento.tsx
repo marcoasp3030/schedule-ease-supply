@@ -263,11 +263,12 @@ function Agendamento() {
           ) : (
             <div className="mt-5 space-y-4">
               <div>
-                <Label className="font-bold">
+                <Label htmlFor="email" className="font-bold">
                   E-mail - Fornecedor{" "}
                   <span className="italic font-normal text-destructive">(obrigatório)</span>
                 </Label>
                 <Input
+                  id="email"
                   type="email"
                   className="mt-2"
                   value={email}
@@ -335,11 +336,12 @@ function Agendamento() {
               </p>
 
               <div>
-                <Label className="font-bold">
+                <Label htmlFor="po" className="font-bold">
                   Pedido de Compra{" "}
                   <span className="italic font-normal text-destructive">(obrigatório)</span>
                 </Label>
                 <Input
+                  id="po"
                   className="mt-2 max-w-[200px]"
                   value={purchaseOrder}
                   maxLength={100}
@@ -349,11 +351,12 @@ function Agendamento() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <Label className="font-bold">
+                  <Label htmlFor="items" className="font-bold">
                     Total de Itens{" "}
                     <span className="italic font-normal text-destructive">(obrigatório)</span>
                   </Label>
                   <Input
+                    id="items"
                     type="number"
                     min={1}
                     className="mt-2"
@@ -362,11 +365,12 @@ function Agendamento() {
                   />
                 </div>
                 <div>
-                  <Label className="font-bold">
+                  <Label htmlFor="boxes" className="font-bold">
                     Volume em Caixas{" "}
                     <span className="italic font-normal text-destructive">(obrigatório)</span>
                   </Label>
                   <Input
+                    id="boxes"
                     type="number"
                     min={1}
                     className="mt-2"
