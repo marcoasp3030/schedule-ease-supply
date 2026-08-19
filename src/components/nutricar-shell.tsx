@@ -1,16 +1,21 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import loja from "@/assets/loja.jpg";
+import logoAsset from "@/assets/nutricar-logo.png.asset.json";
 
 export function NutricarShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <header className="bg-primary text-primary-foreground">
         <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="grid size-8 place-items-center rounded-full bg-primary-foreground/15 text-lg">
-              🍃
-            </span>
+          <Link to="/" className="flex items-center gap-3">
+            <img
+              src={logoAsset.url}
+              alt="Logo NUTRICAR"
+              width={44}
+              height={44}
+              className="size-11 rounded-full bg-primary-foreground/10 object-contain p-0.5"
+            />
             <span className="text-2xl font-bold tracking-[0.2em]">NUTRICAR</span>
           </Link>
         </div>
