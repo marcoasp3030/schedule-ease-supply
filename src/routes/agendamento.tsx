@@ -377,7 +377,8 @@ function Agendamento() {
 
               <div>
                 <Label htmlFor="cnpj" className="font-bold">
-                  CNPJ do fornecedor
+                  CNPJ do fornecedor{" "}
+                  <span className="italic font-normal text-destructive">(obrigatório)</span>
                 </Label>
                 <Input
                   id="cnpj"
@@ -395,31 +396,15 @@ function Agendamento() {
               </div>
 
               <div>
-                <Label className="font-bold">
-                  Fornecedores - Escolha abaixo a empresa a qual representa{" "}
-                  <span className="italic font-normal text-destructive">(obrigatório)</span>
+                <Label htmlFor="razao" className="font-bold">
+                  Fornecedores - Empresa a qual representa
                 </Label>
-                <select
-                  className={`${fieldClass} mt-2`}
-                  value={supplier}
-                  onChange={(e) => setSupplier(e.target.value)}
-                >
-                  <option value="">Selecione o nome da empresa</option>
-                  {(suppliersQuery.data ?? []).map((s) => (
-                    <option key={s.id} value={s.name}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <Label className="font-bold uppercase">Opção outros informar nome abaixo.</Label>
                 <Input
-                  className="mt-2"
-                  value={other}
-                  maxLength={200}
-                  onChange={(e) => setOther(e.target.value)}
+                  id="razao"
+                  readOnly
+                  className="mt-2 bg-muted/60"
+                  placeholder="Preenchido automaticamente pelo CNPJ"
+                  value={razaoSocial}
                 />
               </div>
 
