@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import loja from "@/assets/loja.jpg";
+import lojaAsset from "@/assets/nutricar-market.png.asset.json";
+const loja = lojaAsset.url;
 import logoAsset from "@/assets/nutricar-logo.png.asset.json";
 
 export function NutricarShell({ children }: { children: ReactNode }) {
