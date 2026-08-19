@@ -14,6 +14,7 @@ import { Route as AgendamentoRouteImport } from './routes/agendamento'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminEntregasRouteImport } from './routes/admin/entregas'
+import { Route as AdminRelatoriosRouteImport } from './routes/admin/relatorios'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,12 +41,18 @@ const AdminEntregasRoute = AdminEntregasRouteImport.update({
   path: '/admin/entregas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRelatoriosRoute = AdminRelatoriosRouteImport.update({
+  id: '/admin/relatorios',
+  path: '/admin/relatorios',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agendamento': typeof AgendamentoRoute
   '/auth': typeof AuthRoute
   '/admin/entregas': typeof AdminEntregasRoute
+  '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/agendamento': typeof AgendamentoRoute
   '/auth': typeof AuthRoute
   '/admin/entregas': typeof AdminEntregasRoute
+  '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
@@ -61,15 +69,34 @@ export interface FileRoutesById {
   '/agendamento': typeof AgendamentoRoute
   '/auth': typeof AuthRoute
   '/admin/entregas': typeof AdminEntregasRoute
+  '/admin/relatorios': typeof AdminRelatoriosRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/agendamento' | '/auth' | '/admin/entregas' | '/admin/'
+  fullPaths:
+    | '/'
+    | '/agendamento'
+    | '/auth'
+    | '/admin/entregas'
+    | '/admin/relatorios'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/agendamento' | '/auth' | '/admin/entregas' | '/admin'
+  to:
+    | '/'
+    | '/agendamento'
+    | '/auth'
+    | '/admin/entregas'
+    | '/admin/relatorios'
+    | '/admin'
   id:
-    '__root__' | '/' | '/agendamento' | '/auth' | '/admin/entregas' | '/admin/'
+    | '__root__'
+    | '/'
+    | '/agendamento'
+    | '/auth'
+    | '/admin/entregas'
+    | '/admin/relatorios'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,6 +104,7 @@ export interface RootRouteChildren {
   AgendamentoRoute: typeof AgendamentoRoute
   AuthRoute: typeof AuthRoute
   AdminEntregasRoute: typeof AdminEntregasRoute
+  AdminRelatoriosRoute: typeof AdminRelatoriosRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -117,6 +145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEntregasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/relatorios': {
+      id: '/admin/relatorios'
+      path: '/admin/relatorios'
+      fullPath: '/admin/relatorios'
+      preLoaderRoute: typeof AdminRelatoriosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -125,6 +160,7 @@ const rootRouteChildren: RootRouteChildren = {
   AgendamentoRoute: AgendamentoRoute,
   AuthRoute: AuthRoute,
   AdminEntregasRoute: AdminEntregasRoute,
+  AdminRelatoriosRoute: AdminRelatoriosRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 export const routeTree = rootRouteImport
